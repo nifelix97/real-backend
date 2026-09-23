@@ -1,68 +1,74 @@
-// ============================================
-// 👤 USER MODEL — Database table definition for users
-// ============================================
-// A "Model" in Sequelize represents a database table.
-// Each property we define becomes a column in that table.
 
-import { DataTypes, Model } from "sequelize";
-// DataTypes: Defines the type of each column (STRING, UUID, etc.)
-// Model: The base class that our models extend.
+import { DataTypes, Model } from 'sequelize';
+import sequelize from '../../config/db.js';
 
-import sequelize from "../../config/db.js";
-// The database connection that this model will use.
 
-// ============================================
-// 🏗️ DEFINING THE USER MODEL
-// ============================================
-// We create a class that extends Sequelize's Model class.
-// Then we call User.init() to define the table structure.
 
 class User extends Model {}
 
+
 User.init(
   {
-    // id: Unique identifier for each user (UUID format)
     id: {
-      type: DataTypes.UUID, // Universally Unique Identifier
-      defaultValue: DataTypes.UUIDV4, // Auto-generate a random UUID
-      allowNull: false, // This field is required
-      primaryKey: true, // This is the primary key
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true,
     },
     fullName: {
-      type: DataTypes.STRING, // VARCHAR equivalent in SQL
-      allowNull: false, // Every user must have a name
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: true,
-      unique: true, // No two users can have the same email
-    },
-    PhoneNumber: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false, // Every user needs a password
-    },
-    // role: Controls what the user is allowed to do
-    role: {
-      type: DataTypes.STRING,
-      enum: ["admin", "customer", "seller"], // Only these values allowed
-      defaultValue: "customer", // New users start as customers
       allowNull: false,
-    },
-    // status: Whether the user account is active
-    status: {
-      type: DataTypes.STRING,
-      enum: ["active", "inactive", "blocked"],
+
+      validate: {
+        notEmpty: {
+          msg: "Password is required",
+        },
+
+        len: {
+          args: [8, 100],
+          msg: "Password must be between 8 and 100 characters",
+        },
+
+        isStrongPassword(value) {
+          if (!/[A-Z]/.test(value)) {
+            throw new Error(
+              "Password must contain at least one uppercase letter",
+            );
+          }
+
+          if (!/[a-z]/.test(value)) {
+            throw new Error(
+              "Password must contain at least one lowercase letter",
+            );
+          }
+
+          if (!/[0-9]/.test(value)) {
+            throw new Error("Password must contain at least one number");
+          }
+
+          if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+            throw new Error(
+              "Password must contain at least one special character",
+            );
+          }
+        },
+      },
     },
   },
   {
-    sequelize, // The database connection
-    modelName: "User", // Name Sequelize uses internally
-    tableName: "Users", // Actual table name in the database
-    timestamps: true, // Automatically add createdAt & updatedAt columns
+    sequelize,
+    modelName: "User",
+    tableName: "users",
+    timestamps: true,
   },
 );
 
