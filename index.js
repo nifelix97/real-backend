@@ -2,11 +2,21 @@ import express from "express";
 import sequelize from "./src/config/db.js";
 import "dotenv/config";
 import UserRoutes from "./src/routes/user.js";
+import cors from "cors";
 
 
 const app = express();
 
 app.use(express.json());
+
+app.use(
+    cors(
+        {
+            origin:["http://localhost:5173"],
+            methods: ["GET","POST","PUT","DELETE"],
+        }
+    )
+)
 app.use(UserRoutes);
 
 const PORT = process.env.PORT || 5000;
